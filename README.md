@@ -42,6 +42,14 @@ Project360 performed strongest when checking **clear, concrete evidence** and wa
 For the full evaluation methodology, see `eval_set.md`.
 For the development, debugging, and iteration history, see `debugging-log.md`.
 
+## Where to look next
+
+| File | What's in it |
+|---|---|
+| `architecture.md` | System architecture and diagram |
+| `eval_set.md` | Evaluation set and answer key |
+| `debugging-log.md` | Bugs, fixes, and removed features |
+
 ## MVP vs. Production
 
 Project360 is currently **self-hosted**  using n8n Community Edition and personal accounts as I don’t have access to an organizational account. It also run **on demand** for demonstration and testing. 
