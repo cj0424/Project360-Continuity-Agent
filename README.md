@@ -44,9 +44,9 @@ For the development, debugging, and iteration history, see `debugging-log.md`.
 
 ## MVP vs. Production
 
-Project360 is currently **self-hosted**  using n8n Community Edition and personal accounts as I don’t have access to an organizational account.
+Project360 is currently **self-hosted**  using n8n Community Edition and personal accounts as I don’t have access to an organizational account. It also run **on demand** for demonstration and testing. 
 
-The current prototype is run **on demand** for demonstration and testing. In an actual production deployment, the agent could be configured to run **on a schedule based on the project team’s preferences and workflow**.
+In an actual production deployment, the agent could be configured to run **on a schedule based on the project team’s preferences and workflow**.
 
 To keep the prototype simple, some parts are represented differently from how they would work in production:
 
