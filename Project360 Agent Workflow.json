@@ -1,0 +1,2707 @@
+{
+  "name": "Project Continuity Agent 1",
+  "nodes": [
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.6-flash",
+        "options": {
+          "maxOutputTokens": 65536
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        3728,
+        352
+      ],
+      "id": "bb594d24-6ed0-42f0-a8a0-3e9fa4f6371c",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "iIky4wiol9LzyRH3",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is the complete evidence and records to analyze:\n\n{{ $json.combined }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Evidence means meeting minutes, emails, and narrative content describing what was said or decided in a specific conversation. Official records means Jira tickets, and any content \u2014 a structured table or a stated fact \u2014 within a tracker, log, or project document that reflects the project's current maintained state rather than a one-time conversation. A single source can contain both; judge each item on its own content, not just which file it came from.\nThis project's Jira instance may have fewer configured team members available as assignees than the number of individuals named in the evidence. When an individual named in the evidence has no matching Jira user, but a ticket covering their work is correctly assigned to one of the actual configured team members, treat this as an intentional team-level proxy assignment \u2014 not a genuine data inconsistency. Do not report a mismatch between a named individual in the evidence and a Jira ticket's assignee as an Align finding on this basis alone.\nYou are Agent 1, a project continuity assistant. You will be given the complete evidence and records for a project below. Your job is to compare every item against every other relevant item and identify exactly three types of findings: Capture, Align, and Alert.\nCAPTURE \u2014 An evidence item describes a commitment, decision, or action item that does not appear anywhere in the official records. Propose creating the appropriate record.\nALIGN \u2014 An official record disagrees with another official record, or with evidence, about the same fact. There must be a traceable source establishing which value is correct. If you cannot tell which is correct, note it as needing human investigation instead of proposing a specific fix.\nALERT \u2014 A decision in the evidence may affect a workstream, team, or person not mentioned in that evidence, based on cross-referencing other available documents. Flag this as a heads-up, not an action.\nYou may also receive a section labeled \"=== PRIOR CONTEXT ===\": evidence chunks retrieved because they relate to the current evidence and records, drawn from earlier in the project. This is reference material only \u2014 it does not tell you what was previously reported to a human, only what the project's own documents have said over time. PRIOR CONTEXT is not, by default, a source of new findings \u2014 with one specific exception:\nException: if PRIOR CONTEXT contains a specific, dated commitment, discrepancy, unresolved item, or stated role/assignment that is NOT contradicted, resolved, or superseded by anything in the current evidence and records, AND the same gap is still absent from current official records, you MAY report it as a finding. When you do, you must explicitly note in the description that this was identified from prior project history rather than this run's new evidence, and state how long it appears to have been unresolved based on the dates available in PRIOR CONTEXT. Never use this exception if current evidence or records already confirm, resolve, or contradict the PRIOR CONTEXT item \u2014 in that case, follow the current evidence and records instead, and do not cite PRIOR CONTEXT as the basis for the finding.\nWhen a finding already justified by the current evidence and records is also described in PRIOR CONTEXT as having existed for some time (the same gap, same unresolved fact, appearing across multiple dated sources), phrase the finding to reflect this history \u2014 note how long the situation has persisted \u2014 rather than presenting it as newly discovered. Do not suppress or skip the finding, and do not soften or omit it because it has come up before \u2014 only change how it's framed. If no PRIOR CONTEXT section is present, or none of it is relevant to a given finding, proceed exactly as you would otherwise.\nYour response has exactly two parts, in this order. Do not skip either part or change the markers below.\n\nPART 1 \u2014 ANALYSIS\nWrite this section under the heading \"## ANALYSIS\" exactly as written. This section is meant to be visible \u2014 take the space you need to reason it out loud.\nThe three checks below apply only to the current evidence and records provided to you \u2014 never to the \"=== PRIOR CONTEXT ===\" section on their own. Do not run the Commitment Ledger, the Jira comparison, or the tracker checks against PRIOR CONTEXT as if it were current evidence, and do not generate a new Capture, Align, or Alert finding from PRIOR CONTEXT alone UNLESS the exception above applies. Two separate, later checks (Check Four and Check Five below) govern how PRIOR CONTEXT itself is reviewed.\nWork through five separate checks, covering every current-evidence source provided \u2014 do not skip a source because it looks like background material or because another source seems to cover the same topic:\n\nCHECK ONE \u2014 Evidence and Commitment Ledger\nFor every meeting minutes document and every email, go through every distinct action item, commitment, or decision it contains \u2014 not just the most prominent one per source. Where a document lists multiple action items in a table, check every row, including the first ones listed, not only the ones later in the list. Where a person has more than one commitment across different documents or emails, treat each one individually \u2014 do not assume a later or more prominent commitment from the same person supersedes or covers an earlier, more specific one unless the evidence explicitly says so. For email threads specifically, do not summarize an entire thread as one item \u2014 go through each message in the thread individually, including messages that are purely confirmations or contain nothing actionable. A thread with four messages requires four individual checks, not one summary of the thread's overall purpose. Reviewing a message is not the same as logging it: every message must be read and considered, but only some will pass the Ledger test below.\nBefore adding any email or message to the Commitment Ledger, apply this test: does this message contain a specific, unfulfilled action, decision, or commitment \u2014 someone promising to do something, a deadline not yet met, or a fact still requiring resolution? If a message only confirms something already done, expresses thanks, or contains no forward-looking commitment, it is not a Ledger entry \u2014 do not include it, even if it mentions a system, ticket, or project term. A message about routine administrative activity (invoicing, access provisioning, logistics) is only Ledger-worthy if it states a specific action still outstanding \u2014 a confirmation that something was already completed or already resolved is not.\nA general risk, issue, or topic being logged or mentioned somewhere in official records is not the same as a specific person's dated commitment to a distinct action being tracked. This applies regardless of which system holds the record \u2014 a Jira ticket, a RAID log, a status report, or a tracker. Before marking any commitment as covered, confirm the matching record tracks the SAME specific deliverable \u2014 who will do what, by when \u2014 not just the same general subject or problem area. A shared topic is not the same as a shared, specific commitment.\nBefore moving to Check Two, compile a numbered Commitment Ledger listing every commitment or promise identified above, in the format: \"[Person] promised [specific deliverable] by [date], evidenced in [source].\" For each entry in this ledger, explicitly state one of the following: (a) A specific Jira ticket, tracker row, or document section that tracks this EXACT deliverable \u2014 the same specific action, owner, and timeframe, not merely the same general topic or risk area (name it specifically), or (b) \"No coverage found\" \u2014 if no record tracks this specific deliverable. Any entry marked \"No coverage found\" must become a Capture finding. Do not proceed to Part 2 until every ledger entry has an explicit disposition.\n\nCHECK TWO \u2014 Jira Tickets\nFor every single Jira ticket, check its status, assignee, due date, and priority individually against the evidence and other records \u2014 every ticket on its own, not a representative sample. Do not summarize multiple tickets together in a single bullet, even when they appear to match the evidence with no issue \u2014 write one line per ticket, every time, including tickets where nothing is wrong. Grouping tickets together increases the risk of missing a field-level mismatch on any individual ticket. Before treating an existing Jira ticket as the record for an evidence action item, you must write out an explicit side-by-side comparison: quote the ticket's actual title, quote or closely paraphrase what the evidence describes as the commitment, and then state directly whether they describe the same specific piece of work or two different pieces of work. Do not simply state that a ticket \"matches\" or \"corresponds to\" an evidence item without this side-by-side comparison. If the two descriptions refer to different specific work \u2014 even if they involve the same person, the same country, or the same general topic \u2014 treat the evidence item as uncaptured and report it as its own finding, separate from whatever issue the existing ticket may also have.\n\nCHECK THREE \u2014 Standalone Trackers, Logs, and Assessments (current records only)\nFor every standalone tracker, log, or assessment document (for example a RAID log, a data mapping tracker, a change impact assessment, or a delta/decision log embedded in another document) go through every row, rated item, or logged entry individually and cross-check it against Jira, other documents, and the evidence \u2014 including fields like severity, priority, status, and scope, not just narrative summaries. Do not summarize multiple rows or entries together in a single bullet, even when they appear to match with no issue \u2014 write one line per row or entry, every time, including rows where nothing is wrong. Do not treat a document as fully covered just because you referenced it for one finding elsewhere, or because you reviewed one row or section of it \u2014 a document can contain several independent findings across different rows or sections.\nFor each row or entry whose value already matches the evidence, check whether the provided evidence names a specific confirming event, meeting, or date that established this value. If it does, check whether the row's own note or resolution text references that same specific event. If the evidence names a specific confirming event that the row's note does not mention at all, treat this as its own ALIGN finding, recommending the note be updated to reference that event \u2014 the value field itself requires no change.\nIn addition to checking each tracker or log against current evidence, also check whether the SAME fact (the same issue, risk, or status) appears in more than one current official record or status document. If two current records disagree about the same fact \u2014 for example, a status report shows a risk as resolved while a separate master log/tracker document still shows it as open \u2014 treat this as its own ALIGN finding, naming both conflicting sources explicitly, even if neither directly cites the other or references Jira.\n\nCHECK FOUR \u2014 PRIOR CONTEXT vs. Current Evidence and Records\nStep 0 (required before Steps 1-5): Before doing anything else in this check, build an explicit list of every named individual, every named role/owner, and every specific status/percentage value that appears anywhere in PRIOR CONTEXT tables or trackers. Write this as a simple list, one item per line, even if there are many. You must produce this full list before proceeding \u2014 do not skip this step or summarize it as \"several names appear.\" For example, if PRIOR CONTEXT contains a tracker naming five different row owners, all five names must appear in your list individually, not as \"various team members are named as owners.\" If no PRIOR CONTEXT section is present, or it contains no tables/trackers, state this plainly and skip to Check Five.\nOnce this list exists, go through it one entry at a time and apply Steps 1-5 below to each individual entry \u2014 do not batch multiple entries together in one sentence, even if your conclusion for several of them is the same.\nStep 1: For every tracker, log, or table embedded in PRIOR CONTEXT, go through each individual row, field, or named role separately.\nStep 2: For each one, ask: does the current evidence or current official records name this EXACT same specific fact \u2014 the same owner, the same percentage, the same named individual, the same status value \u2014 not just the same general subject area?\nStep 3: If current evidence only mentions the same general topic, without specifically confirming, updating, or contradicting this particular field or role, treat it as uncovered. A shared topic is not the same as a shared fact.\nExample: PRIOR CONTEXT names a specific person as the owner of a task. Current evidence discusses that same task's progress without naming that person at all. The person's role is still uncovered \u2014 general topic overlap does not resolve a specific, named detail.\nStep 4: This check can surface any of the three finding types, not only Alert. Apply whichever type actually fits:\n- CAPTURE if PRIOR CONTEXT describes a commitment or responsibility that still has no matching official record.\n- ALIGN if a PRIOR CONTEXT value (a status, a percentage, an owner) still contradicts a current official record's value on the same fact.\n- ALERT if PRIOR CONTEXT shows a person or team who should have been included in current decisions but was not.\nDo not default to Alert simply because the item originates from PRIOR CONTEXT.\nStep 5: List every individual field, row, or named role in PRIOR CONTEXT that fails the coverage test in Step 3 as a candidate finding, tagged with its correct type from Step 4 \u2014 even if the surrounding document's general subject is also referenced elsewhere in current evidence.\n\nCHECK FIVE \u2014 Internal Consistency Within PRIOR CONTEXT\nIf a \"=== PRIOR CONTEXT ===\" section is present and contains a tracker or table, perform this check separately from Check Four \u2014 this check compares PRIOR CONTEXT rows against EACH OTHER, not against current evidence.\nStep 1: Identify sets of rows in the same PRIOR CONTEXT tracker or table that describe comparable work \u2014 the same kind of task, mapping, or assessment applied across a set of systems, regions, or categories.\nStep 2: Compare the coverage of each row in that set. If one row covers all members of the set (for example, all four regional systems) and a comparable row covers only some of them, with no stated reason in the document for the difference, this is an internal inconsistency.\nStep 3: Report this as its own ALIGN finding, describing the specific rows being compared and the specific coverage gap between them. This finding is valid even if neither row is directly contradicted by anything in current evidence \u2014 the inconsistency being reported is between the two PRIOR CONTEXT rows themselves, not between PRIOR CONTEXT and current evidence.\nStep 4: If no PRIOR CONTEXT tracker or table is present, or no such inconsistency exists, state this plainly and move on \u2014 do not force a finding here if none genuinely fits.\n\nFINDING QUALITY STANDARD\nEvery finding you produce must meet the same standard a senior project manager would expect from a written status report. Before including any finding in your output, verify it against this checklist:\n1. evidence_sources is never an empty array. Every finding must cite at least one real, current-evidence or official-record source (PRIOR CONTEXT-only findings use the sourcing rule defined in the Rules section below).\n2. suggested_action.fields is never an empty object for any finding whose system is Jira, Excel tracker, or Word document. At minimum, a Jira capture must include summary, description, and assignee if a responsible person is named anywhere in the evidence; an Excel or Word finding must include location, and new_value, plus old_value when the current incorrect value is known.\n3. If a specific person is named anywhere in the evidence as responsible for the described work, that person's name must appear in suggested_action.fields.assignee (for Jira) or in the description (for other systems) \u2014 do not omit a known responsible party.\n4. description explains what was found and why it matters in 2-4 sentences \u2014 not one vague sentence, not a full paragraph.\n\nHere is one complete, correctly-formed finding for each system type, meeting every point above:\n\nCAPTURE (Jira):\n{\n  \"type\": \"capture\",\n  \"title\": \"Create Jira ticket for Canada carrier change materials\",\n  \"description\": \"Laura Vidal committed to drafting Canada change materials by September 5, 2026. These materials address moving from custom postal-code carrier logic to standard SAP transportation zones.\",\n  \"evidence_sources\": [\"260826_Meeting_Minutes.txt\"],\n  \"suggested_action\": {\n    \"system\": \"Jira\",\n    \"target\": \"New Jira Ticket\",\n    \"change\": \"Create a new Jira ticket assigned to Laura Vidal to track the Canada change materials due September 5, 2026.\",\n    \"fields\": {\n      \"summary\": \"Draft Canada change materials for standard carrier logic\",\n      \"assignee\": \"Laura Vidal\",\n      \"duedate\": \"2026-09-05\",\n      \"priority\": \"Medium\",\n      \"description\": \"Draft Canada-specific change materials addressing the move from custom postal-code carrier logic to standard SAP transportation zone configuration.\"\n    }\n  }\n}\n\nALIGN (Excel tracker):\n{\n  \"type\": \"align\",\n  \"title\": \"Correct source system scope for Warehouse/Shipping data\",\n  \"description\": \"The Warehouse/Shipping row in the Data Mapping Tracker lists only two of four legacy systems, while comparable rows list all four. Current evidence confirms profiling applies across all four countries.\",\n  \"evidence_sources\": [\"240826_Meeting_Minutes.txt\"],\n  \"suggested_action\": {\n    \"system\": \"Excel tracker\",\n    \"target\": \"Novis_Data_Mapping_Cleansing_Tracker.txt, Warehouse/Shipping row\",\n    \"change\": \"Update the Source System(s) field to include all four legacy systems.\",\n    \"fields\": {\n      \"location\": \"Warehouse/Shipping row, Source System(s) column\",\n      \"old_value\": \"NAV (CA) \u00b7 MYOB (AU)\",\n      \"new_value\": \"Oracle EBS (UK) \u00b7 SAP ECC (MX) \u00b7 NAV (CA) \u00b7 MYOB (AU)\"\n    }\n  }\n}\n\nALERT (notification):\n{\n  \"type\": \"alert\",\n  \"title\": \"Notify Lucas Ferreira of Mexico's formal sign-off\",\n  \"description\": \"Fernanda Ruiz confirmed Mexico's formal sign-off on August 28, 2026, including the retained CFDI-linked interface scope. Lucas Ferreira was not included on this confirmation and needs it for his ongoing interface assessment.\",\n  \"evidence_sources\": [\"T6_M2_fernanda.txt\"],\n  \"suggested_action\": {\n    \"system\": \"notification\",\n    \"target\": \"Lucas Ferreira\",\n    \"change\": \"Notify Lucas Ferreira that Mexico's sign-off is confirmed, including the D-6 scope.\",\n    \"fields\": {\n      \"recipients\": [\"Lucas Ferreira\"],\n      \"message\": \"Mexico confirmed formal sign-off on August 28, 2026, including the retained CFDI-linked interface under D-6.\"\n    }\n  }\n}\n\nA finding that fails any point in this checklist is incomplete and must be corrected before being included in the final JSON array \u2014 do not submit a finding with a known gap against this standard. Apply this same completeness standard to every finding you produce, regardless of type.\n\nPART 2 \u2014 FINDINGS\nEvery action item, commitment, or discrepancy you identified during the five checks above that meets the Capture, Align, or Alert criteria must become its own finding below. Do not omit an item because it seems minor, because it overlaps in topic with a larger finding, or because reporting it would make the list longer. Only combine two items into one finding if they describe the literal same fact from more than one source \u2014 never combine two distinct action items, tickets, or discrepancies into one finding just because they relate to the same event or decision.\nBefore writing the JSON array, count every distinct action item, commitment, and discrepancy you identified across all five checks in Part 1. For each one, confirm it appears as its own finding below, or state explicitly \u2014 as a short list immediately before ##JSON-START## \u2014 which other finding it was merged into and why they describe the literal same fact. Do not proceed to write the JSON array until this accounting is complete.\nImmediately after that accounting list, write a line containing exactly: ##JSON-START##\nDirectly after that line, write your final findings as a JSON array \u2014 nothing else on those lines, no markdown code fences, no commentary before or after it \u2014 using this exact structure:\n{\n  \"type\": \"capture\" | \"align\" | \"alert\",\n  \"title\": \"short one-line summary\",\n  \"description\": \"what was found and why it matters\",\n  \"evidence_sources\": [\"source 1\", \"source 2\"],\n  \"suggested_action\": {\n    \"system\": \"Jira\" | \"Excel tracker\" | \"Word document\" | \"notification\",\n    \"target\": \"exact ticket key, tracker/table and row, or document and section\",\n    \"change\": \"exact change, description of manual update needed, or who to notify and why, in plain readable language\",\n    \"fields\": {}\n  }\n}\nWrite the \"description\" and \"change\" fields in plain, direct language for a busy project manager reading on their phone \u2014 not in a formal analyst or audit-report tone. Follow these rules:\n- Keep sentences short. If a sentence has more than one clause connected by \"and,\" \"which,\" or a comma-separated aside, split it into two sentences.\n- Avoid citation-style phrasing like \"Per Section 3.4 of...\" or \"As noted in...\". State the fact directly, and let evidence_sources carry the citation.\n- Break complex facts into separate short sentences rather than stacking multiple named entities or technical terms into one sentence.\n- Write as if explaining the situation out loud to a colleague, not drafting a formal report.\n- Never state that something \"isn't tracked,\" \"has no ticket,\" or \"isn't logged\" \u2014 this is always redundant, since the suggested_action itself is the act of fixing that gap.\n- For \"capture\" type findings where \"system\" is \"Jira\", \"Excel tracker\", or \"Word document\", always include a \"description\" key inside \"fields\" \u2014 a clean, standalone paragraph following the same sentence-length and plain-language rules above.\nThe \"fields\" object holds the same information as \"change\" but as structured key-value pairs a system can act on directly, not prose. Populate it based on the \"system\" value:\n- For \"Jira\": include only the fields that actually need to change, using these keys where relevant: \"status\", \"duedate\" (format YYYY-MM-DD), \"priority\", \"assignee\", \"description\". Omit any key that isn't changing, except \"description\" for capture findings, which must always be included per the rule above.\n- For \"notification\": use \"recipients\" (an array of names) and \"message\" (the exact text to send).\n- For \"Excel tracker\" or \"Word document\": use \"location\" (the specific row, cell, or section identifier) and \"new_value\" (the corrected text or value). Include \"old_value\" when the current incorrect value is known.\nIf a finding recommends only manual human review rather than a specific mechanical change, leave \"fields\" as an empty object.\nIf there are no findings, return an empty array: []\nImmediately after the closing bracket of the array, write a final line containing exactly: ##JSON-END##\nRules:\n- Only report a finding if you can point to a specific item in the current evidence or records supporting it, OR if it qualifies under the PRIOR CONTEXT exception explicitly defined above.\n- evidence_sources must only list sources from the current evidence and records \u2014 never cite a PRIOR CONTEXT chunk as a source, EVEN for a finding generated under the PRIOR CONTEXT exception. For a PRIOR CONTEXT-originated finding, describe the origin in the \"description\" field instead (e.g. \"identified from project history, open since [date]\"), and leave evidence_sources referencing only current sources if any apply, or use a general label like \"Prior project history\" if no current source applies.\n- If the same fact appears in multiple current-evidence sources, report it once, listing every source together.\n- If nothing needs action, say so in PART 1, and return an empty array in PART 2. Do not invent findings.\n- Name the exact system, target, and change for Capture/Align findings involving a ticket, tracker row, or table. For a narrative paragraph in a document, describe what's outdated and recommend manual review rather than drafting replacement text.\n- For Alert findings, name who should be notified and why."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        3728,
+        144
+      ],
+      "id": "47631ce4-a6d4-42fc-b116-8962f6f759c0",
+      "name": "Chain - Compare & Classify",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message",
+          "callback_query"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        -64
+      ],
+      "id": "48b79b91-beec-4da5-8c08-c3685e4729e6",
+      "name": "Telegram Trigger",
+      "webhookId": "e9f9eb7d-1e03-4d84-a764-9e8b1c3364a3",
+      "credentials": {
+        "telegramApi": {
+          "id": "8xzZAphH8VVFmXSf",
+          "name": "Project360 Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first();\nif (!input || !input.json || !input.json.text) {\n  return [];\n}\nconst raw = input.json.text;\n\nlet start = raw.indexOf('##JSON-START##');\nlet jsonSlice;\n\nif (start !== -1) {\n  start += '##JSON-START##'.length;\n  const end = raw.indexOf('##JSON-END##');\n  jsonSlice = raw.slice(start, end !== -1 ? end : undefined).trim();\n} else {\n  // Fallback: marker malformed or missing \u2014 locate the JSON array directly\n  const arrayStart = raw.indexOf('[');\n  const arrayEnd = raw.lastIndexOf(']');\n  if (arrayStart === -1 || arrayEnd === -1) {\n    throw new Error('Could not locate JSON array in LLM output \u2014 markers missing and no array found.');\n  }\n  jsonSlice = raw.slice(arrayStart, arrayEnd + 1).trim();\n}\n\nconst findings = JSON.parse(jsonSlice);\nconst runId = new Date().toISOString();\nconst projectId = $('Project Found').first().json.project_name;\nreturn findings.map(finding => ({\n  json: {\n    run_id: runId,\n    project_id: projectId,\n    type: finding.type,\n    title: finding.title,\n    description: finding.description,\n    evidence_sources: finding.evidence_sources,\n    suggested_action: finding.suggested_action,\n    status: 'pending'\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4032,
+        144
+      ],
+      "id": "c4a2f0fe-fa07-4650-a6b6-950bd6364d1b",
+      "name": "Parse Findings JSON"
+    },
+    {
+      "parameters": {
+        "tableId": "drafts",
+        "dataToSend": "autoMapInputData"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        4240,
+        144
+      ],
+      "id": "ccb53b8a-9492-48a9-b1bc-172bc90d978f",
+      "name": "Save Drafts to Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "yHqFIG1VFZUA3sQN",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "drafts",
+        "returnAll": true,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "run_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Parse Findings JSON').first().json.run_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        4464,
+        144
+      ],
+      "id": "6e2e0743-f126-4e0b-847e-7b16f4ef33de",
+      "name": "Get Run's Findings",
+      "executeOnce": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "yHqFIG1VFZUA3sQN",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const findings = $input.all().map(item => item.json);\n\nconst grouped = { align: [], capture: [], alert: [] };\nfindings.forEach(f => {\n  if (grouped[f.type]) grouped[f.type].push(f.title);\n});\n\nconst total = findings.length;\nconst runId = findings.length > 0 ? findings[0].run_id : 'unknown';\n\nconst emojiMap = { align: '\ud83d\udd34', capture: '\ud83d\udfe1', alert: '\ud83d\udd35' };\nconst labelMap = { align: 'Align', capture: 'Capture', alert: 'Alert' };\n\nlet summaryText;\nlet buttons;\n\nif (total === 0) {\n  summaryText = `\u2705 Project Continuity Check \u2014 no new findings this run. Everything's in sync.`;\n  buttons = [];\n} else {\n  summaryText = `\ud83e\udd16 Project Continuity Check \u2014 ${total} findings\\n\\n`;\n\n  ['align', 'capture', 'alert'].forEach(type => {\n    if (grouped[type].length > 0) {\n      summaryText += `${emojiMap[type]} ${labelMap[type]} (${grouped[type].length})\\n`;\n      grouped[type].forEach(title => {\n        summaryText += `\u2022 ${title}\\n`;\n      });\n      summaryText += `\\n`;\n    }\n  });\n\n  summaryText = summaryText.trim();\n\n  buttons = [\n  { text: '\ud83d\udc40 Preview', callback_data: `preview_run:${runId}` },\n  { text: '\ud83d\uddd1\ufe0f Dismiss', callback_data: `dismiss_run:${runId}` }\n];\n}\n\nreturn [{\n  json: {\n    run_id: runId,\n    total: total,\n    summary_text: summaryText,\n    buttons: buttons\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4672,
+        144
+      ],
+      "id": "8b3304b6-42d1-43c0-a283-26ed869d13bf",
+      "name": "Build Summary Message"
+    },
+    {
+      "parameters": {
+        "chatId": "=YOUR_GROUP_CHAT_ID",
+        "text": "={{ $json.summary_text }}",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "={{ $json.buttons[0].text }}",
+                    "additionalFields": {
+                      "callback_data": "={{ $json.buttons[0].callback_data }}"
+                    }
+                  },
+                  {
+                    "text": "={{ $json.buttons[1].text }}",
+                    "additionalFields": {
+                      "callback_data": "={{ $json.buttons[1].callback_data }}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4896,
+        144
+      ],
+      "id": "84ae9bed-c708-4c06-9321-d6db8344c323",
+      "name": "Send a text message",
+      "webhookId": "1781981b-debc-471b-9502-749a18c98120",
+      "credentials": {
+        "telegramApi": {
+          "id": "8xzZAphH8VVFmXSf",
+          "name": "Project360 Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.callback_query.data }}",
+                    "rightValue": "preview_run:",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    },
+                    "id": "4ea28be1-9842-483c-a892-223d42a2b880"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Preview Findings"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "23eb3489-9f97-4e61-8f2e-397a917dcb64",
+                    "leftValue": "={{ $json.callback_query.data }}",
+                    "rightValue": "dismiss_run:",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Dismiss"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ac213f6f-a0c3-444e-922e-648bde99a5f9",
+                    "leftValue": "={{ $json.callback_query.data }}",
+                    "rightValue": "approve_finding:",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Approve Finding"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        -576
+      ],
+      "id": "c1ec0dcf-050e-4e45-8cab-6783aa617535",
+      "name": "Route by Button"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "71f167fc-6b8f-46a8-ac95-f930d9b13be1",
+              "leftValue": "={{ $json.callback_query }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        176,
+        -64
+      ],
+      "id": "c3b51f24-16d6-4d1c-8438-934fc96ccfb1",
+      "name": "Route by Message Type"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "drafts",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "run_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.callback_query.data.replace('dismiss_run:', '') }}"
+            },
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "pending"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "dismissed"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        720,
+        -512
+      ],
+      "id": "28456c80-c905-4b6b-9199-18f0b4873772",
+      "name": "Dismiss Findings",
+      "credentials": {
+        "supabaseApi": {
+          "id": "yHqFIG1VFZUA3sQN",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.callback_query.message.chat.id }}",
+        "text": "\ud83d\uddd1\ufe0f Findings dismissed. No further action will be taken.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        -512
+      ],
+      "id": "97bdfde0-8fed-4995-8498-4c65cc035455",
+      "name": "Confirm Dismiss",
+      "webhookId": "44abe15e-dfa3-4db6-853e-d3401731c8a7",
+      "executeOnce": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "8xzZAphH8VVFmXSf",
+          "name": "Project360 Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "drafts",
+        "returnAll": true,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "run_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.callback_query.data.replace('preview_run:', '') }}"
+            },
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "pending"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        720,
+        -672
+      ],
+      "id": "29b84f25-23e1-473d-8817-d2690c938754",
+      "name": "Get Pending Findings",
+      "credentials": {
+        "supabaseApi": {
+          "id": "yHqFIG1VFZUA3sQN",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const findings = $input.all().map(item => item.json);\n\nconst typeLabel = { align: '\ud83d\udd34 Align', capture: '\ud83d\udfe1 Capture', alert: '\ud83d\udd35 Alert' };\n\nreturn findings.map(finding => {\n  const cardText = `${typeLabel[finding.type] || finding.type}\\n\\n` +\n    `${finding.title}\\n\\n` +\n    `${finding.description}\\n\\n` +\n    `\ud83d\udcc4 Sources: ${finding.evidence_sources.join(', ')}\\n\\n` +\n    `\ud83d\udca1 Suggested: ${finding.suggested_action.change}`;\n\n  return {\n    json: {\n      finding_id: finding.id,\n      card_text: cardText,\n      buttons: [\n        { text: '\u2705 Approve', callback_data: `approve_finding:${finding.id}` },\n        { text: '\u270f\ufe0f Edit', callback_data: `revise_finding:${finding.id}` }\n      ]\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        -672
+      ],
+      "id": "6c83f3c2-070a-4d1e-aa70-c568d9d5ba1b",
+      "name": "Build Finding Cards"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.callback_query.message.chat.id }}",
+        "text": "={{ $json.card_text }}",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "={{ $json.buttons[0].text }}",
+                    "additionalFields": {
+                      "callback_data": "={{ $json.buttons[0].callback_data }}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1072,
+        -672
+      ],
+      "id": "bbd7cf4c-cc90-4db3-ab33-d984767658f2",
+      "name": "Send Finding Card",
+      "webhookId": "b2ba1fe4-ac24-4a60-bfa1-40d3781d9c27",
+      "credentials": {
+        "telegramApi": {
+          "id": "8xzZAphH8VVFmXSf",
+          "name": "Project360 Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "drafts",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.callback_query.data.replace('approve_finding:', '') }}"
+            },
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "pending"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "approved"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        720,
+        -336
+      ],
+      "id": "79139d54-1ed3-45ba-9227-6f58720c8de5",
+      "name": "Approve Finding",
+      "credentials": {
+        "supabaseApi": {
+          "id": "yHqFIG1VFZUA3sQN",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.suggested_action.system }}",
+                    "rightValue": "Jira",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "f425398c-d5d4-4054-bc14-4bbe61ec7fc8"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Jira"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "57e08d8f-d745-4464-812e-5e2d48d0f77d",
+                    "leftValue": "={{ ['Excel tracker', 'Word document'].includes($json.suggested_action.system) }}",
+                    "rightValue": "true",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Manual Review"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e126ff91-1c54-4e39-9ad7-ca061091af51",
+                    "leftValue": "={{ $json.suggested_action.system }}",
+                    "rightValue": "notification",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Notification"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        880,
+        -352
+      ],
+      "id": "aa5ae85d-7a3a-47bb-a696-7d6629d50f5c",
+      "name": "Route by system"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.callback_query.message.chat.id }}",
+        "text": "={{ '\ud83d\udccb Manual update needed (' + $json.suggested_action.system + '):\\n\\n' + $json.suggested_action.change + '\\n\\n\ud83d\udccd Where: ' + $json.suggested_action.target + '\\n\\nThis system isn\\'t connected for automatic updates yet \u2014 please make this change directly.' }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1344,
+        -384
+      ],
+      "id": "346815ef-7542-4f91-b830-a9dc2c7e84e6",
+      "name": "Notify Manual Update",
+      "webhookId": "abbf4791-a9a2-469d-9963-425b5562a407",
+      "credentials": {
+        "telegramApi": {
+          "id": "8xzZAphH8VVFmXSf",
+          "name": "Project360 Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "=YOUR_PERSONAL_CHAT_ID",
+        "text": "={{ '\ud83d\udd14 Notification \u2014 ' + $json.suggested_action.target + '\\n\\n' + $json.suggested_action.fields.message }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1344,
+        -240
+      ],
+      "id": "40e61dc4-0c6a-4584-a84e-74d67fabca40",
+      "name": "Notify Alert",
+      "webhookId": "7b9fccf6-ac3c-4bdc-9c03-de7e1cd4570c",
+      "credentials": {
+        "telegramApi": {
+          "id": "8xzZAphH8VVFmXSf",
+          "name": "Project360 Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "64a003d7-3339-43f0-8c9e-3661f2523660",
+              "leftValue": "={{ $json.suggested_action.target.toLowerCase().includes('ticket') }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1616,
+        -496
+      ],
+      "id": "334ae928-8670-4da7-a844-8dd93ab46d6f",
+      "name": "Needs new ticket"
+    },
+    {
+      "parameters": {
+        "project": {
+          "__rl": true,
+          "value": "10001",
+          "mode": "list",
+          "cachedResultName": "Novis Foods Group \u2014 Global SAP S/4HANA Transformation"
+        },
+        "issueType": {
+          "__rl": true,
+          "value": "10009",
+          "mode": "list",
+          "cachedResultName": "Task"
+        },
+        "summary": "={{ $json.suggested_action.fields.summary }}",
+        "additionalFields": {
+          "description": "={{ $json.suggested_action.fields.description || $json.description }}"
+        }
+      },
+      "type": "n8n-nodes-base.jira",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        -592
+      ],
+      "id": "097b14d9-44ad-4635-88fe-c98564e3327b",
+      "name": "Create Jira Ticket",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "mR2wY09ztsIbJ3FZ",
+          "name": "Jira SW Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://YOUR_JIRA_INSTANCE.atlassian.net/rest/api/3/issue/{{ $('Create Jira Ticket').first().json.key }}/transitions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "jiraSoftwareCloudApi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2400,
+        -592
+      ],
+      "id": "ca85c109-73f7-458a-a7d5-cb7f2d7514f2",
+      "name": "Get Available Transitions (Create)",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "mR2wY09ztsIbJ3FZ",
+          "name": "Jira SW Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c2d0ecac-2921-4775-8943-0a16cb0023b8",
+              "leftValue": "={{ $json.found }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2736,
+        -592
+      ],
+      "id": "63ce105c-e28b-4140-a357-b3fc8b2f8ce2",
+      "name": "Attempt transition (Create)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://YOUR_JIRA_INSTANCE.atlassian.net/rest/api/3/issue/{{ $('Create Jira Ticket').first().json.key }}/transitions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "jiraSoftwareCloudApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"transition\": { \"id\": $json.transitionId } } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3136,
+        -768
+      ],
+      "id": "5d8e6fee-6801-477e-b5a1-790041ddf457",
+      "name": "Submit Transition (Create)",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "mR2wY09ztsIbJ3FZ",
+          "name": "Jira SW Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.callback_query.message.chat.id }}",
+        "text": "={{ '\u26a0\ufe0f ' + $json.ticketKey + ' (' + $json.ticketName + '): ticket created, but status couldn\\'t be changed to \"' + $json.desiredStatus + '\" automatically \u2014 please transition it manually in Jira. (Suggested assignee: ' + $('Approve Finding').first().json.suggested_action.fields.assignee + ' \u2014 please assign manually.)\\n\\n\ud83d\udd17 https://YOUR_JIRA_INSTANCE.atlassian.net/browse/' + $json.ticketKey }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3152,
+        -544
+      ],
+      "id": "d7ddae81-f942-4376-ba20-2a5b46a90990",
+      "name": "Status Change Failed",
+      "webhookId": "2e709098-e589-4886-9274-9a0edb0f78eb",
+      "credentials": {
+        "telegramApi": {
+          "id": "8xzZAphH8VVFmXSf",
+          "name": "Project360 Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.callback_query.message.chat.id }}",
+        "text": "={{ '\ud83c\udfab ' + $json.ticketKey + ' (' + $json.ticketName + '): created successfully. (Suggested assignee: ' + $('Approve Finding').first().json.suggested_action.fields.assignee + ' \u2014 please assign manually.)\\n\\n\ud83d\udd17 https://YOUR_JIRA_INSTANCE.atlassian.net/browse/' + $json.ticketKey }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3504,
+        -768
+      ],
+      "id": "5c016bd5-6df4-401c-aebe-2a7804201cd2",
+      "name": "Jira Action Confirmed",
+      "webhookId": "9395a7f0-d162-448d-9d5e-a6ce8b0331ac",
+      "credentials": {
+        "telegramApi": {
+          "id": "8xzZAphH8VVFmXSf",
+          "name": "Project360 Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://YOUR_JIRA_INSTANCE.atlassian.net/rest/api/3/issue/{{ $json.key }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "jiraSoftwareCloudApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"fields\": $json.jiraFields } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2208,
+        -592
+      ],
+      "id": "ac00ae8d-5bc9-47f9-9375-0baa8badc26e",
+      "name": "Set Due Date & Priority",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "mR2wY09ztsIbJ3FZ",
+          "name": "Jira SW Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const original = $('Approve Finding').first().json;\nconst f = original.suggested_action.fields;\nconst ticketData = $input.first().json;\n\nconst fields = {};\nif (f.priority) {\n  fields.priority = { name: f.priority };\n}\nif (f.duedate) {\n  fields.duedate = f.duedate;\n}\n\nreturn [{ json: { key: ticketData.key, jiraFields: fields } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2016,
+        -592
+      ],
+      "id": "89971d64-c80b-420e-98b3-f6ad5f2ef32b",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "let ticketKey;\ntry {\n  ticketKey = $('Create Jira Ticket').first().json.key;\n} catch (e) {\n  ticketKey = $('Approve Finding').first().json.suggested_action.target;\n}\n\nconst rawTitle = $('Approve Finding').first().json.title;\nconst ticketName = rawTitle.replace(/^Create Jira [Tt]icket for /, '');\n\nreturn [{ json: { ...$input.first().json, ticketKey, ticketName } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3296,
+        -912
+      ],
+      "id": "05b36300-33e2-4df6-b06d-30f6330e701d",
+      "name": "Resolve Ticket Key"
+    },
+    {
+      "parameters": {
+        "jsCode": "let ticketKey;\ntry {\n  ticketKey = $('Create Jira Ticket').first().json.key;\n} catch (e) {\n  ticketKey = $('Approve Finding').first().json.suggested_action.target;\n}\n\nconst rawTitle = $('Approve Finding').first().json.title;\nconst ticketName = rawTitle.replace(/^Create Jira [Tt]icket for /, '');\n\nreturn [{ json: { ...$input.first().json, ticketKey, ticketName } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2976,
+        -544
+      ],
+      "id": "c1953c25-efba-4d1d-a6f5-938809a310e9",
+      "name": "Resolve Ticket Key Failed"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst f = data.suggested_action.fields;\n\nconst fields = {};\nif (f.description) {\n  fields.description = {\n    type: \"doc\",\n    version: 1,\n    content: [{ type: \"paragraph\", content: [{ type: \"text\", text: f.description }] }]\n  };\n}\nif (f.priority) {\n  fields.priority = { name: f.priority };\n}\nif (f.duedate) {\n  fields.duedate = f.duedate;\n}\n\nreturn [{ json: { ...data, jiraFields: fields } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1824,
+        -400
+      ],
+      "id": "9575c581-2573-4723-ad26-1857d4da210a",
+      "name": "Prepare Update Fields"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://YOUR_JIRA_INSTANCE.atlassian.net/rest/api/3/issue/' + $json.suggested_action.target }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "jiraSoftwareCloudApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"fields\": $json.jiraFields } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1984,
+        -400
+      ],
+      "id": "f29e81fe-7ba8-461c-9d26-c09bf03e546c",
+      "name": "Update Fields",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "mR2wY09ztsIbJ3FZ",
+          "name": "Jira SW Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://YOUR_JIRA_INSTANCE.atlassian.net/rest/api/3/issue/' + $('Approve Finding').first().json.suggested_action.target + '/transitions' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "jiraSoftwareCloudApi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2160,
+        -400
+      ],
+      "id": "6c7127bd-b0be-42e9-a860-29ef8b339dee",
+      "name": "Get Available Transitions (Update)",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "mR2wY09ztsIbJ3FZ",
+          "name": "Jira SW Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const transitions = $input.first().json.transitions;\nconst desiredStatus = $('Approve Finding').first().json.suggested_action.fields.status;\n\nif (!desiredStatus) {\n  return [{ json: { found: true, skipped: true, reason: 'no status change requested' } }];\n}\n\nconst match = transitions.find(t => t.to.name.toLowerCase() === desiredStatus.toLowerCase());\nif (!match) {\n  return [{ json: { found: false, desiredStatus: desiredStatus } }];\n}\n\nreturn [{ json: { found: true, transitionId: match.id, desiredStatus: desiredStatus } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2336,
+        -400
+      ],
+      "id": "8621cabb-c6bd-495c-b9b7-fedb98b018ac",
+      "name": "Match Transition (Update)"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "25045fed-48f8-4a2b-b789-791505362ec9",
+              "leftValue": "={{ $json.found }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2528,
+        -400
+      ],
+      "id": "3c5fae99-a308-4a53-9553-8330fe9636d6",
+      "name": "Attempt Transition? (Update)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://YOUR_JIRA_INSTANCE.atlassian.net/rest/api/3/issue/' + $('Approve Finding').first().json.suggested_action.target + '/transitions' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "jiraSoftwareCloudApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"transition\": { \"id\": $json.transitionId } } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3024,
+        -256
+      ],
+      "id": "35aa2895-acc6-4483-b05c-bb028654e408",
+      "name": "Submit Transition (Update)",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "mR2wY09ztsIbJ3FZ",
+          "name": "Jira SW Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const ticketKey = $('Approve Finding').first().json.suggested_action.target;\nreturn [{ json: { ...$input.first().json, ticketKey } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3184,
+        -368
+      ],
+      "id": "df9a0374-dba3-4a50-950a-404ca86dd854",
+      "name": "Resolve Ticket Key (Update)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const ticketKey = $('Approve Finding').first().json.suggested_action.target;\nreturn [{ json: { ...$input.first().json, ticketKey } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2672,
+        -112
+      ],
+      "id": "e688b33c-531d-4311-8b8e-437f87dbcc71",
+      "name": "Resolve Ticket Key (Update Failed)"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.callback_query.message.chat.id }}",
+        "text": "={{ '\ud83c\udfab ' + $json.ticketKey + ': updated successfully.\\n\\n\ud83d\udd17 https://YOUR_JIRA_INSTANCE.atlassian.net/browse/' + $json.ticketKey }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3360,
+        -256
+      ],
+      "id": "28ee0c9f-e0e1-4981-bf0b-876082ca1066",
+      "name": "Update Confirmed",
+      "webhookId": "2db9e309-a8d8-453d-89e5-0d71bab7f123",
+      "credentials": {
+        "telegramApi": {
+          "id": "8xzZAphH8VVFmXSf",
+          "name": "Project360 Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.callback_query.message.chat.id }}",
+        "text": "={{ '\u26a0\ufe0f ' + $json.ticketKey + ': fields updated, but status couldn\\'t be changed to \"' + $json.desiredStatus + '\" automatically \u2014 please transition it manually in Jira.\\n\\n\ud83d\udd17 https://YOUR_JIRA_INSTANCE.atlassian.net/browse/' + $json.ticketKey }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2848,
+        -112
+      ],
+      "id": "7de6fb1f-529d-46c2-9ec4-f3cee65f57e5",
+      "name": "Update Status Change Failed",
+      "webhookId": "85e7d5c3-94d4-455b-aa27-c89fe75117bc",
+      "credentials": {
+        "telegramApi": {
+          "id": "8xzZAphH8VVFmXSf",
+          "name": "Project360 Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const transitions = $input.first().json.transitions;\nconst desiredStatus = $('Approve Finding').first().json.suggested_action.fields.status;\n\nif (!desiredStatus) {\n  return [{ json: { found: true, skipped: true, reason: 'no status change requested' } }];\n}\n\nconst match = transitions.find(t => t.to.name.toLowerCase() === desiredStatus.toLowerCase());\nif (!match) {\n  return [{ json: { found: false, desiredStatus: desiredStatus } }];\n}\n\nreturn [{ json: { found: true, transitionId: match.id, desiredStatus: desiredStatus } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2576,
+        -592
+      ],
+      "id": "63ef9de1-c9a1-4a4e-8958-68ee797d1726",
+      "name": "Match Transition (Create)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $json.message.text;\nconst projectName = text.replace(/^\\/continuitycheck\\s*/i, '').trim();\nreturn [{ json: { ...$json, requestedProject: projectName } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -368,
+        288
+      ],
+      "id": "f32c6f93-38b7-4195-9ad3-085b5901ea7c",
+      "name": "Extract Project Name"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c9343062-19f4-4f94-9dd4-0d85dcf5c8bf",
+              "leftValue": "={{ $json.requestedProject.length > 0 }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -176,
+        288
+      ],
+      "id": "a6572bec-0ff5-47ec-a95d-94d009c4be6d",
+      "name": "Has Project Name"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.chat.id }}",
+        "text": "Please specify a project \u2014 e.g. /continuitycheck Novis Foods Group",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        16,
+        416
+      ],
+      "id": "a2936148-0685-40f3-82b3-a4a68101c499",
+      "name": "Ask For Project Name",
+      "webhookId": "1831e9ff-4a61-4ae1-a938-e1d88dd14cd5",
+      "credentials": {
+        "telegramApi": {
+          "id": "8xzZAphH8VVFmXSf",
+          "name": "Project360 Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8202eb92-92dc-4926-a93d-46363db1eb01",
+              "leftValue": "={{ $json.project_name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        176,
+        192
+      ],
+      "id": "6562e462-9dc0-4e6c-911b-92375010c41d",
+      "name": "Project Found",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.chat.id }}",
+        "text": "No project found matching that name. Please check and try again",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        304,
+        416
+      ],
+      "id": "2a51e8b9-6c90-4077-8dc2-2a88b8215cde",
+      "name": "Project Not Found",
+      "webhookId": "eef53433-1e88-47da-9603-0a152911954f",
+      "credentials": {
+        "telegramApi": {
+          "id": "8xzZAphH8VVFmXSf",
+          "name": "Project360 Telegram Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "projects",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "project_name",
+              "condition": "ilike",
+              "keyValue": "={{ '%' + $json.requestedProject + '%' }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        32,
+        192
+      ],
+      "id": "69b25a2e-8a3a-4215-94f3-1c4f8f9f8293",
+      "name": "Look Up Project",
+      "credentials": {
+        "supabaseApi": {
+          "id": "yHqFIG1VFZUA3sQN",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = $input.all();\nconst MIN_SIMILARITY = 0.5;\nconst MIN_RANK = 0.01;\nconst MAX_CHUNKS = 10;\nconst MAX_PER_SOURCE = 4;\nconst MAX_CHUNK_LENGTH = 1500;\nconst scored = results.map(item => {\n  const isVector = item.json.similarity !== undefined;\n  return {\n    ...item.json,\n    score: isVector ? item.json.similarity : item.json.rank,\n    threshold: isVector ? MIN_SIMILARITY : MIN_RANK\n  };\n});\nconst sourceCounts = {};\nconst relevant = [];\nfor (const r of scored.sort((a, b) => b.score - a.score)) {\n  if (r.score === undefined || r.score < r.threshold) continue;\n  const count = sourceCounts[r.source_reference] || 0;\n  if (count >= MAX_PER_SOURCE) continue;\n  relevant.push(r);\n  sourceCounts[r.source_reference] = count + 1;\n  if (relevant.length >= MAX_CHUNKS) break;\n}\nif (relevant.length === 0) {\n  return [{ json: { priorContextText: \"\" } }];\n}\nlet formatted = \"=== PRIOR CONTEXT ===\\n\\n\";\nfor (const r of relevant) {\n  const text = r.chunk_text.length > MAX_CHUNK_LENGTH\n    ? r.chunk_text.slice(0, MAX_CHUNK_LENGTH) + \"...\"\n    : r.chunk_text;\n  formatted += `--- From ${r.source_reference} ---\\n${text}\\n\\n`;\n}\nreturn [{ json: { priorContextText: formatted } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3296,
+        144
+      ],
+      "id": "987a666e-68e5-47eb-a27f-a495cf2341be",
+      "name": "Format Prior Context"
+    },
+    {
+      "parameters": {
+        "jsCode": "const priorContext = $json.priorContextText;\nconst currentEvidence = $('Combine Evidence').item.json.combined;\n\nconst finalText = currentEvidence + \"\\n\\n\" + priorContext;\n\nreturn [{ json: { combined: finalText } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3520,
+        144
+      ],
+      "id": "6e3e0538-cf44-4e6a-9645-d21d1068c1de",
+      "name": "Merge with current evidence"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_SUPABASE_PROJECT_REF.supabase.co/rest/v1/rpc/match_evidence_chunks_keyword",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"search_terms\": {{ JSON.stringify($json.searchTerms) }},\n  \"match_project_id\": \"{{ $('Project Found').first().json.project_name }}\",\n  \"match_count\": 15\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3056,
+        144
+      ],
+      "id": "3df625d2-9fbd-4f95-bf0b-a7eb29d1a158",
+      "name": "Search Prior Context - Keyword",
+      "credentials": {
+        "supabaseApi": {
+          "id": "yHqFIG1VFZUA3sQN",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $('Combine Evidence').item.json.combined;\nconst stopwords = new Set(['this','that','with','from','have','been','were','will','would',\n  'their','which','about','these','those','after','before','while','there','where','when',\n  'what','than','then','also','into','more','some','such','only','over','under','across',\n  'among','between','during','following','since','still','upon','within','without','each',\n  'both','every','other','another','same','different']);\n// Ticket keys, e.g. KAN-11\nconst ticketKeys = [...new Set(text.match(/\\b[A-Z]{2,}-\\d+\\b/g) || [])];\n// Multi-word proper-noun phrases, e.g. \"Asset Accounting\", \"Data Mapping Tracker\"\nconst properPhrases = [...new Set(text.match(/\\b[A-Z][a-z]+(?:\\s+[A-Z][a-z]+){1,3}\\b/g) || [])];\n// Frequently-repeated significant words\nconst words = text.toLowerCase().match(/\\b[a-z]{4,}\\b/g) || [];\nconst freq = {};\nfor (const w of words) {\n  if (stopwords.has(w)) continue;\n  freq[w] = (freq[w] || 0) + 1;\n}\nconst topWords = Object.entries(freq)\n  .sort((a, b) => b[1] - a[1])\n  .slice(0, 20)\n  .map(([w]) => w);\nconst searchTerms = [...ticketKeys, ...properPhrases.slice(0, 15), ...topWords]\n  .filter((v, i, arr) => arr.indexOf(v) === i)\n  .slice(0, 40)\n  .join(' ');\nreturn [{ json: { searchTerms } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2256,
+        144
+      ],
+      "id": "9c7f1ca4-3446-48fe-b7eb-a0600c3eba86",
+      "name": "Extract Search Terms"
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs = require('fs');\nconst dirPath = '/files/evidence/onedrive';\nconst files = fs.readdirSync(dirPath);\n\nconst results = [];\nfor (const file of files) {\n  const content = fs.readFileSync(`${dirPath}/${file}`, 'utf8');\n  results.push({\n    json: {\n      fileName: file,\n      content: content,\n      sourceSystem: 'onedrive'\n    }\n  });\n}\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        192
+      ],
+      "id": "928a5f04-218c-4d4c-8090-11240a4265e6",
+      "name": "OneDrive Fetch"
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs = require('fs');\nconst dirPath = '/files/evidence/outlook';\nconst files = fs.readdirSync(dirPath);\n\nconst results = [];\nfor (const file of files) {\n  const content = fs.readFileSync(`${dirPath}/${file}`, 'utf8');\n  results.push({\n    json: {\n      fileName: file,\n      content: content,\n      sourceSystem: 'outlook'\n    }\n  });\n}\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        16
+      ],
+      "id": "b64197f5-1344-48a3-af5c-1363594c821f",
+      "name": "Outlook Fetch"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1296,
+        128
+      ],
+      "id": "44133077-74e5-47a1-847c-ad0027295d9f",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.jira",
+      "typeVersion": 1,
+      "position": [
+        640,
+        368
+      ],
+      "id": "52f3780f-e65f-472a-b017-6e964a6027ce",
+      "name": "Jira Fetch",
+      "executeOnce": true,
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "mR2wY09ztsIbJ3FZ",
+          "name": "Jira SW Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function fnv1a64(str) {\n  let hash = 0xcbf29ce484222325n;\n  const prime = 0x100000001b3n;\n  for (let i = 0; i < str.length; i++) {\n    hash ^= BigInt(str.charCodeAt(i));\n    hash = BigInt.asUintN(64, hash * prime);\n  }\n  return hash.toString(16);\n}\n\nconst results = [];\nfor (const item of $input.all()) {\n  const fileName = item.json.fileName;\n  const fileContent = item.json.content;\n  const sourceSystem = item.json.sourceSystem;\n  const hash = fnv1a64(fileContent);\n\n  results.push({\n    json: {\n      fileName,\n      sourceSystem,\n      content: fileContent,\n      contentHash: hash\n    }\n  });\n}\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        16
+      ],
+      "id": "d7f7f39b-3eb2-4839-b090-07520a619524",
+      "name": "Hash Outlook Files"
+    },
+    {
+      "parameters": {
+        "jsCode": "function fnv1a64(str) {\n  let hash = 0xcbf29ce484222325n;\n  const prime = 0x100000001b3n;\n  for (let i = 0; i < str.length; i++) {\n    hash ^= BigInt(str.charCodeAt(i));\n    hash = BigInt.asUintN(64, hash * prime);\n  }\n  return hash.toString(16);\n}\n\nconst results = [];\nfor (const item of $input.all()) {\n  const fileName = item.json.fileName;\n  const fileContent = item.json.content;\n  const sourceSystem = item.json.sourceSystem;\n  const hash = fnv1a64(fileContent);\n\n  results.push({\n    json: {\n      fileName,\n      sourceSystem,\n      content: fileContent,\n      contentHash: hash\n    }\n  });\n}\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        192
+      ],
+      "id": "107ff810-6aee-474f-b2e7-c103da6cf742",
+      "name": "Hash OneDrive Files"
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\nfor (const item of $input.all()) {\n  const issue = item.json;\n  const key = issue.key;\n  const fields = issue.fields || {};\n\n  const summary = fields.summary || '';\n  const status = fields.status?.name || '';\n  const assignee = fields.assignee?.displayName || 'Unassigned';\n  const priority = fields.priority?.name || '';\n  const dueDate = fields.duedate || 'No due date';\n  const description = fields.description || '';\n\n  const content = `Ticket: ${key}\\nSummary: ${summary}\\nStatus: ${status}\\nAssignee: ${assignee}\\nPriority: ${priority}\\nDue: ${dueDate}\\nDescription: ${description}`;\n\n  results.push({\n    json: {\n      fileName: key,\n      content: content,\n      sourceSystem: 'jira'\n    }\n  });\n}\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        368
+      ],
+      "id": "15066a94-7090-4150-8b5c-fb5621ad2843",
+      "name": "Reshape Jira Tickets"
+    },
+    {
+      "parameters": {
+        "jsCode": "function fnv1a64(str) {\n  let hash = 0xcbf29ce484222325n;\n  const prime = 0x100000001b3n;\n  for (let i = 0; i < str.length; i++) {\n    hash ^= BigInt(str.charCodeAt(i));\n    hash = BigInt.asUintN(64, hash * prime);\n  }\n  return hash.toString(16);\n}\n\nconst results = [];\nfor (const item of $input.all()) {\n  const fileName = item.json.fileName;\n  const fileContent = item.json.content;\n  const sourceSystem = item.json.sourceSystem;\n  const hash = fnv1a64(fileContent);\n\n  results.push({\n    json: {\n      fileName,\n      sourceSystem,\n      content: fileContent,\n      contentHash: hash\n    }\n  });\n}\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1088,
+        368
+      ],
+      "id": "b39f4161-7f5b-4767-bdf4-0b349673b1cc",
+      "name": "Hash Jira Tickets"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "processed_evidence",
+        "returnAll": true,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "source_reference",
+              "condition": "eq",
+              "keyValue": "={{ $json.fileName }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1456,
+        144
+      ],
+      "id": "51b2baf1-f580-4761-8336-59a33c1b7834",
+      "name": "Get Previously Seen",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "yHqFIG1VFZUA3sQN",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const originalItems = $('Merge').all();\nconst lookupResults = $input.all();\nconst projectId = $('Project Found').first().json.project_name;\n\n// Build a lookup map keyed by source_reference so we never rely on array order/length\nconst lookupMap = {};\nfor (const lr of lookupResults) {\n  const ref = lr.json.source_reference;\n  if (ref) lookupMap[ref] = lr.json;\n}\n\nconst results = [];\nfor (const item of originalItems) {\n  const fileName = item.json.fileName;\n  const content = item.json.content;\n  const contentHash = item.json.contentHash;\n  const sourceSystem = item.json.sourceSystem;\n  const lookupResult = lookupMap[fileName] || {};\n  const existingHash = lookupResult.content_hash;\n  const isNew = !existingHash || existingHash !== contentHash;\n  const hasExistingRecord = !!existingHash;\n  results.push({\n    json: { fileName, content, contentHash, sourceSystem, isNew, hasExistingRecord, projectId }\n  });\n}\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1632,
+        144
+      ],
+      "id": "5b4956dd-a9ae-4c40-95b2-c5229290723c",
+      "name": "Compare Hashes - Agent1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nlet output = '';\n\nfor (const item of items) {\n  const source = item.json.sourceSystem;\n  const label = source === 'onedrive' ? 'DOCUMENT' \n              : source === 'outlook' ? 'EMAIL' \n              : 'JIRA TICKET';\n  output += `\\n=== ${label}: ${item.json.fileName} ===\\n${item.json.content}\\n`;\n}\n\nreturn [{ json: { combined: output } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2064,
+        144
+      ],
+      "id": "bfe8a060-9c20-4264-9f76-b9acf64af55a",
+      "name": "Combine Evidence"
+    },
+    {
+      "parameters": {
+        "tableId": "processed_evidence",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "source_reference",
+              "fieldValue": "={{ $json.fileName }}"
+            },
+            {
+              "fieldId": "content_hash",
+              "fieldValue": "={{ $json.contentHash }}"
+            },
+            {
+              "fieldId": "last_indexed_at",
+              "fieldValue": "={{ $now.toISO() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2064,
+        496
+      ],
+      "id": "18e647a2-a1a1-4c29-b043-0f139af9dc87",
+      "name": "Mark Evidence Seen",
+      "alwaysOutputData": true,
+      "retryOnFail": false,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "supabaseApi": {
+          "id": "yHqFIG1VFZUA3sQN",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "processed_evidence",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "source_reference",
+              "condition": "eq",
+              "keyValue": "={{ $json.fileName }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "content_hash",
+              "fieldValue": "={{ $json.contentHash }}"
+            },
+            {
+              "fieldId": "last_indexed_at",
+              "fieldValue": "={{ $now.toISO() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2064,
+        336
+      ],
+      "id": "93392e70-72e4-4099-b401-6745b5959fcd",
+      "name": "Update Evidence Hash",
+      "alwaysOutputData": true,
+      "retryOnFail": false,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "supabaseApi": {
+          "id": "yHqFIG1VFZUA3sQN",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e5a5b32c-2ce6-40f3-bb5a-05933c9be2f3",
+              "leftValue": "={{ $json.hasExistingRecord }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1840,
+        352
+      ],
+      "id": "ed7439f5-04d7-4e40-b4a8-64496fa33116",
+      "name": "Has Existing Record",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "81d3a170-5e45-418b-b92c-35d07ac56a99",
+              "leftValue": "={{ $json.isNew }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1328,
+        400
+      ],
+      "id": "a14b5d42-9bbf-4cd1-bebc-6ee0cf63835a",
+      "name": "Is New - Agent1",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "tableId": "evidence_chunks",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "project_id",
+              "fieldValue": "={{ $json.projectId }}"
+            },
+            {
+              "fieldId": "source_system",
+              "fieldValue": "={{ $json.sourceSystem }}"
+            },
+            {
+              "fieldId": "source_reference",
+              "fieldValue": "={{ $json.fileName }}"
+            },
+            {
+              "fieldId": "chunk_text",
+              "fieldValue": "={{ $json.chunkText }}"
+            },
+            {
+              "fieldId": "chunk_index",
+              "fieldValue": "={{ $json.chunkIndex }}"
+            },
+            {
+              "fieldId": "content_hash",
+              "fieldValue": "={{ $json.contentHash }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1664,
+        528
+      ],
+      "id": "a24f5f16-3f5a-4676-a424-6aad8288726d",
+      "name": "Save to Evidence Chunks",
+      "retryOnFail": false,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "supabaseApi": {
+          "id": "yHqFIG1VFZUA3sQN",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const CHUNK_SIZE = 300;\nconst CHUNK_OVERLAP = 50;\nconst results = [];\nfor (const item of $input.all()) {\n  const { fileName, content, contentHash, sourceSystem, projectId } = item.json;\n  const words = content.split(/\\s+/).filter(Boolean);\n  if (words.length <= CHUNK_SIZE) {\n    results.push({ json: { fileName, sourceSystem, contentHash, projectId, chunkText: content, chunkIndex: 0 } });\n    continue;\n  }\n  let start = 0;\n  let chunkIndex = 0;\n  while (start < words.length) {\n    const end = Math.min(start + CHUNK_SIZE, words.length);\n    const chunkText = words.slice(start, end).join(' ');\n    results.push({ json: { fileName, sourceSystem, contentHash, projectId, chunkText, chunkIndex } });\n    if (end === words.length) break;\n    start += CHUNK_SIZE - CHUNK_OVERLAP;\n    chunkIndex++;\n  }\n}\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1504,
+        528
+      ],
+      "id": "d255d3e8-dba3-4051-bd65-b486875ff2e1",
+      "name": "Chunk Evidence",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\nfor (const item of $input.all()) {\n  const { sourceSystem, isNew } = item.json;\n\n  if (sourceSystem === 'jira') {\n    results.push(item);\n    continue;\n  }\n\n  if (isNew) {\n    results.push(item);\n  }\n}\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1840,
+        144
+      ],
+      "id": "46a120f1-36b0-45f8-8ace-1e4f86f6680f",
+      "name": "Filter New Evidence"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Evidence excerpt (what this project evidence actually discusses):\n{{ $('Combine Evidence').item.json.combined.slice(0, 6000) }}\n\nKeywords already extracted: {{ $json.searchTerms }}\n\nBased on the SPECIFIC topics, issues, and unresolved items in the evidence excerpt above \u2014 especially anything related to data quality, ownership gaps, or tracking/status concerns \u2014 suggest 8-10 additional keywords that an older, related tracker or log document might use to describe these same topics, even if worded differently. Return ONLY the additional words, space-separated, lowercase, nothing else.",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a domain-aware search query expansion assistant for a project management continuity tool. You will be given (1) a snippet of actual project evidence and (2) a list of keywords already extracted from it. Your job is to identify the SPECIFIC topics, issues, and processes discussed in the evidence, then suggest additional keywords that a different document \u2014 written weeks or months earlier, using different wording \u2014 might use to describe those SAME underlying topics. Focus on concrete synonyms and domain terms (e.g. if the evidence discusses \"duplicate shipping records\", think about what a data-quality tracker might call this: \"cleansing\", \"deduplication\", \"data quality\", \"record reconciliation\"). Do not suggest generic project-management words like \"approval\", \"workflow\", \"deployment\", or \"milestone\" unless they are specifically and concretely tied to what this evidence describes. You do not explain your reasoning, add commentary, or use bullets, numbers, or punctuation. You return only a plain space-separated list of lowercase words."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        2464,
+        144
+      ],
+      "id": "477de3d2-356b-48b2-b7d4-55bec681417b",
+      "name": "Expand Search Terms",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.6-flash",
+        "options": {
+          "maxOutputTokens": 65536
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        2464,
+        320
+      ],
+      "id": "f647724f-0115-4361-8197-23ed81dd0101",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "iIky4wiol9LzyRH3",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const originalTerms = $('Extract Search Terms').item.json.searchTerms;\nconst geminiResponse = $json.text || $json.output || '';\nconst expandedTerms = geminiResponse.trim().toLowerCase();\nconst searchTerms = `${originalTerms} ${expandedTerms}`.trim();\nreturn [{ json: { searchTerms } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2816,
+        144
+      ],
+      "id": "3e8826ac-b484-4332-b379-8837bf572929",
+      "name": "Merge Expanded Terms"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8535c1ad-3760-4d70-b127-dff3aff32c64",
+              "leftValue": "={{ $json.skipped }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2896,
+        -768
+      ],
+      "id": "755317cf-220b-4f04-9a05-8a8a58a0925d",
+      "name": "Needs Transition? (Create)"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ef4c0008-2bd2-4584-95ec-03baa349086d",
+              "leftValue": "={{ $json.skipped }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2768,
+        -352
+      ],
+      "id": "47b0d784-1673-4a84-b83b-68c14c691967",
+      "name": "Needs Transition? (Update)"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Chain - Compare & Classify",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chain - Compare & Classify": {
+      "main": [
+        [
+          {
+            "node": "Parse Findings JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Findings JSON": {
+      "main": [
+        [
+          {
+            "node": "Save Drafts to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Route by Message Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Drafts to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Get Run's Findings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Run's Findings": {
+      "main": [
+        [
+          {
+            "node": "Build Summary Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Summary Message": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Message Type": {
+      "main": [
+        [
+          {
+            "node": "Route by Button",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract Project Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Button": {
+      "main": [
+        [
+          {
+            "node": "Get Pending Findings",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dismiss Findings",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Approve Finding",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dismiss Findings": {
+      "main": [
+        [
+          {
+            "node": "Confirm Dismiss",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Pending Findings": {
+      "main": [
+        [
+          {
+            "node": "Build Finding Cards",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Finding Cards": {
+      "main": [
+        [
+          {
+            "node": "Send Finding Card",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approve Finding": {
+      "main": [
+        [
+          {
+            "node": "Route by system",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by system": {
+      "main": [
+        [
+          {
+            "node": "Needs new ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify Manual Update",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Alert": {
+      "main": [
+        []
+      ]
+    },
+    "Needs new ticket": {
+      "main": [
+        [
+          {
+            "node": "Create Jira Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Update Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Jira Ticket": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Available Transitions (Create)": {
+      "main": [
+        [
+          {
+            "node": "Match Transition (Create)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attempt transition (Create)": {
+      "main": [
+        [
+          {
+            "node": "Needs Transition? (Create)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resolve Ticket Key Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Submit Transition (Create)": {
+      "main": [
+        [
+          {
+            "node": "Resolve Ticket Key",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Due Date & Priority": {
+      "main": [
+        [
+          {
+            "node": "Get Available Transitions (Create)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Set Due Date & Priority",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve Ticket Key": {
+      "main": [
+        [
+          {
+            "node": "Jira Action Confirmed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve Ticket Key Failed": {
+      "main": [
+        [
+          {
+            "node": "Status Change Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Update Fields": {
+      "main": [
+        [
+          {
+            "node": "Update Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Fields": {
+      "main": [
+        [
+          {
+            "node": "Get Available Transitions (Update)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Available Transitions (Update)": {
+      "main": [
+        [
+          {
+            "node": "Match Transition (Update)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Match Transition (Update)": {
+      "main": [
+        [
+          {
+            "node": "Attempt Transition? (Update)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attempt Transition? (Update)": {
+      "main": [
+        [
+          {
+            "node": "Needs Transition? (Update)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resolve Ticket Key (Update Failed)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Submit Transition (Update)": {
+      "main": [
+        [
+          {
+            "node": "Resolve Ticket Key (Update)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve Ticket Key (Update)": {
+      "main": [
+        [
+          {
+            "node": "Update Confirmed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve Ticket Key (Update Failed)": {
+      "main": [
+        [
+          {
+            "node": "Update Status Change Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Match Transition (Create)": {
+      "main": [
+        [
+          {
+            "node": "Attempt transition (Create)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Project Name": {
+      "main": [
+        [
+          {
+            "node": "Has Project Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Project Name": {
+      "main": [
+        [
+          {
+            "node": "Look Up Project",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ask For Project Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask For Project Name": {
+      "main": [
+        []
+      ]
+    },
+    "Project Found": {
+      "main": [
+        [
+          {
+            "node": "Outlook Fetch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "OneDrive Fetch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Jira Fetch",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Project Not Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Look Up Project": {
+      "main": [
+        [
+          {
+            "node": "Project Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Prior Context": {
+      "main": [
+        [
+          {
+            "node": "Merge with current evidence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge with current evidence": {
+      "main": [
+        [
+          {
+            "node": "Chain - Compare & Classify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Prior Context - Keyword": {
+      "main": [
+        [
+          {
+            "node": "Format Prior Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Search Terms": {
+      "main": [
+        [
+          {
+            "node": "Expand Search Terms",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OneDrive Fetch": {
+      "main": [
+        [
+          {
+            "node": "Hash OneDrive Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Outlook Fetch": {
+      "main": [
+        [
+          {
+            "node": "Hash Outlook Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Jira Fetch": {
+      "main": [
+        [
+          {
+            "node": "Reshape Jira Tickets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hash Outlook Files": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hash OneDrive Files": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Reshape Jira Tickets": {
+      "main": [
+        [
+          {
+            "node": "Hash Jira Tickets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hash Jira Tickets": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Get Previously Seen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Previously Seen": {
+      "main": [
+        [
+          {
+            "node": "Compare Hashes - Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compare Hashes - Agent1": {
+      "main": [
+        [
+          {
+            "node": "Filter New Evidence",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Is New - Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Evidence": {
+      "main": [
+        [
+          {
+            "node": "Extract Search Terms",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Evidence Hash": {
+      "main": [
+        []
+      ]
+    },
+    "Has Existing Record": {
+      "main": [
+        [
+          {
+            "node": "Update Evidence Hash",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Evidence Seen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is New - Agent1": {
+      "main": [
+        [
+          {
+            "node": "Has Existing Record",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Chunk Evidence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chunk Evidence": {
+      "main": [
+        [
+          {
+            "node": "Save to Evidence Chunks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter New Evidence": {
+      "main": [
+        [
+          {
+            "node": "Combine Evidence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Expand Search Terms",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Expand Search Terms": {
+      "main": [
+        [
+          {
+            "node": "Merge Expanded Terms",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Expanded Terms": {
+      "main": [
+        [
+          {
+            "node": "Search Prior Context - Keyword",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs Transition? (Create)": {
+      "main": [
+        [
+          {
+            "node": "Resolve Ticket Key",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Submit Transition (Create)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs Transition? (Update)": {
+      "main": [
+        [
+          {
+            "node": "Resolve Ticket Key (Update)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Submit Transition (Update)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "03dc7a84-adcb-4529-b3a6-1cee890f0d9f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b10985f1fb4f5aea8fa2f55b7b017ec917c7a9e6d1170ba397b43ba8efdda990"
+  },
+  "nodeGroups": [],
+  "id": "p1bZHH7tesGxvia9",
+  "tags": []
+}
