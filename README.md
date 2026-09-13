@@ -44,7 +44,7 @@ For the development, debugging, and iteration history, see `debugging-log.md`.
 
 ## Build Context
 
-Project360 is currently a **self-hosted prototype** running on my own machine using n8n Community Edition and personal accounts.
+Project360 is currently a **self-hosted prototype** running on my own machine using n8n Community Edition and personal accounts as I don’t have access to an organizational account.
 
 To keep the prototype simple, some parts are represented differently from how they would work in production:
 
