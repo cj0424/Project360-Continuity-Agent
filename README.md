@@ -53,6 +53,5 @@ To keep the prototype simple, some parts are represented differently from how th
 * **Microsoft Word:** Word updates remain a deliberate human step because editing written content in context is more open-ended than changing a structured field.
 * **Telegram:** Telegram currently acts as the approval and notification layer. The same workflow could be connected to Microsoft Teams without changing the underlying logic.
 
-The prototype uses **fictional data**. A real deployment would involve confidential client and firm content.
-
+The prototype uses **fictional firm and client data**. A real deployment would involve confidential client and firm content.
 For confidential or production use, Google provides **paid-service data protections** for Gemini. When the Gemini API is used through a project with an active Google Cloud billing account, or through Vertex AI, prompts and responses are **not used to improve or train Google's models** under the applicable paid-service terms.
