@@ -36,7 +36,7 @@ Nothing is updated, actioned, or escalated until a human approves the finding.
 Project360 performed strongest when checking **clear, concrete evidence** and was less reliable when a finding required **subjective judgement**.
 
 * **~95–100% reliable** when identifying clear issues, such as **outdated Jira records or commitments missing from project records**
-* **~60–75% reliable** when making judgement-based assessments, such as **whether another person or team should have been involved in a decision**
+* **~60–75% reliable** when making judgement-based assessments
 * **100% structurally complete** since a fix was introduced partway through the build
 
 For the full evaluation methodology, see `eval_set.md`.
