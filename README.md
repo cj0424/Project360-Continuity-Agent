@@ -6,7 +6,7 @@ An AI agent that reads Outlook emails, OneDrive documents, and Jira tickets, and
 
 This was built for long-running, multi-team projects — tested against a simulated SAP transformation using entirely fictional project data.
 
-Keeping decisions, commitments, and project records aligned is necessary, but much of the work is repetitive manual checking. Project managers and teams spend time cross-checking emails, meeting notes, documents, and tickets — work Project360 can complete in minutes so people can focus on decisions and delivery.
+Keeping decisions, commitments, and project records aligned is necessary, but much of the work is repetitive manual checking. Project managers and teams spend time cross-checking emails, meeting notes, documents, and jira tickets. An agent can handle that task in minutes, allowing people to focus on other important work and project delivery.
 
 ## What it does
 
