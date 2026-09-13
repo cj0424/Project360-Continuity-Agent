@@ -42,13 +42,15 @@ Project360 performed strongest when checking **clear, concrete evidence** and wa
 For the full evaluation methodology, see `eval_set.md`.
 For the development, debugging, and iteration history, see `debugging-log.md`.
 
-## Build Context
+## MVP vs. Production
 
 Project360 is currently a **self-hosted prototype** running on my own machine using n8n Community Edition and personal accounts as I don’t have access to an organizational account.
 
+The current prototype is run **on demand** for demonstration and testing. In an actual production deployment, the agent could be configured to run **on a schedule based on the project team’s preferences and workflow**.
+
 To keep the prototype simple, some parts are represented differently from how they would work in production:
 
-* **Outlook & OneDrive:** Evidence currently enters as plain-text files rather than live Microsoft 365 connections. The core retrieval and reasoning logic is source-independent, so live connectors could be added later without rebuilding the workflow.
+* **Outlook & OneDrive:** Evidence currently enters as plain-text files rather than through live Microsoft 365 connections. The core retrieval and reasoning logic is source-independent, so live connectors could be added later without rebuilding the workflow.
 * **Excel:** Excel updates follow the same structured approach as Jira and could be automated using an Excel node.
 * **Microsoft Word:** Word updates remain a deliberate human step because editing written content in context is more open-ended than changing a structured field.
 * **Telegram:** Telegram currently acts as the approval and notification layer. The same workflow could be connected to Microsoft Teams without changing the underlying logic.
