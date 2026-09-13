@@ -53,7 +53,7 @@ This prototype is self-hosted on my own machine using n8n Community edition and 
 
 Outlook and OneDrive evidence currently enters as plain-text files rather than live Microsoft 365 connections. The downstream retrieval and reasoning workflow is source-independent, so live connectors can be added without rebuilding the core logic.
 
-Excel updates follow the same structured approach as Jira and could be automated through the Microsoft 365 connector. Word remains a deliberate human step because editing prose in context is more open-ended than changing a structured field.
+Excel updates follow the same structured approach as Jira and could be automated through excel node. Microsoft Word remains a deliberate human step because editing prose in context is more open-ended than changing a structured field.
 
 Telegram is a stand-in for the messaging layer; the approval workflow could be connected to Microsoft Teams without changing the underlying logic.
 
