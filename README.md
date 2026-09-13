@@ -23,38 +23,36 @@ Findings are posted to a Telegram group as review cards. Once approved:
 
 ## Human in the Loop
 
-Human approval is deliberate. Testing showed that LLMs can still miss information or produce incorrect findings, even after prompt revisions.
+Project360 does **not act on its own**.
 
-Project360 therefore identifies and proposes; a person decides and approves before any action is taken.
+Testing showed that an LLM can still miss information or produce incorrect findings, even after improving the prompts. So Project360 follows a simple rule:
+
+**The agent identifies and proposes. A person reviews and approves.**
+
+Nothing is updated, actioned, or escalated until a human approves the finding.
 
 ## Results
 
-- ~95–100% reliable on concrete findings such as stale tickets and uncaptured commitments
-- ~60–75% reliable on subjective findings such as whether someone should have been involved
-- Zero structurally broken findings since a fix applied partway through the build
+Project360 performed strongest when checking **clear, concrete evidence** and was less reliable when a finding required **subjective judgement**.
 
-See `eval_set.md` for the evaluation methodology and `debugging-log.md` for the full development history.
+* **~95–100% reliable** when identifying clear issues, such as **outdated Jira records or commitments missing from project records**
+* **~60–75% reliable** when making judgement-based assessments, such as **whether another person or team should have been involved in a decision**
+* **100% structurally complete** since a fix was introduced partway through the build
 
-## Where to look next
+For the full evaluation methodology, see `eval_set.md`.
+For the development, debugging, and iteration history, see `debugging-log.md`.
 
-| File | What's in it |
-| --- | --- |
-| `architecture.md` | System architecture and diagram |
-| `eval_set.md` | Evaluation set and answer key |
-| `debugging-log.md` | Bugs, fixes, and removed features |
+## Build Context
 
-## Built with
+Project360 is currently a **self-hosted prototype** running on my own machine using n8n Community Edition and personal accounts.
 
-n8n, Google Gemini, Supabase/Postgres, Jira API, Telegram.
+To keep the prototype simple, some parts are represented differently from how they would work in production:
 
-## Build context
+* **Outlook & OneDrive:** Evidence currently enters as plain-text files rather than live Microsoft 365 connections. The core retrieval and reasoning logic is source-independent, so live connectors could be added later without rebuilding the workflow.
+* **Excel:** Excel updates follow the same structured approach as Jira and could be automated using an Excel node.
+* **Microsoft Word:** Word updates remain a deliberate human step because editing written content in context is more open-ended than changing a structured field.
+* **Telegram:** Telegram currently acts as the approval and notification layer. The same workflow could be connected to Microsoft Teams without changing the underlying logic.
 
-This prototype is self-hosted on my own machine using n8n Community edition and personal accounts.
+The prototype uses **fictional data**. A real deployment would involve confidential client and firm content.
 
-Outlook and OneDrive evidence currently enters as plain-text files rather than live Microsoft 365 connections. The downstream retrieval and reasoning workflow is source-independent, so live connectors can be added without rebuilding the core logic.
-
-Excel updates follow the same structured approach as Jira and could be automated through excel node. Microsoft Word remains a deliberate human step because editing prose in context is more open-ended than changing a structured field.
-
-Telegram is a stand-in for the messaging layer; the approval workflow could be connected to Microsoft Teams without changing the underlying logic.
-
-The prototype uses fictional data, but a real deployment would involve confidential client and firm content. Google's Gemini API  excludes that data from training and human review once the API key sits on a billed Google Cloud account or Vertex AI — a production version of this agent would run exclusively on that billed tier.
+For confidential or production use, Google provides **paid-service data protections** for Gemini. When the Gemini API is used through a project with an active Google Cloud billing account, or through Vertex AI, prompts and responses are **not used to improve or train Google's models** under the applicable paid-service terms.
