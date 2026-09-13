@@ -57,4 +57,4 @@ Excel updates follow the same structured approach as Jira and could be automated
 
 Telegram is a stand-in for the messaging layer; the approval workflow could be connected to Microsoft Teams without changing the underlying logic.
 
-The prototype uses fictional data, but a real deployment would involve confidential client and firm content. Google's Gemini API only excludes that data from training and human review once the API key sits on a billed Google Cloud account or Vertex AI, not the free tier — a production version of this agent would run exclusively on that billed tier.
+The prototype uses fictional data, but a real deployment would involve confidential client and firm content. Google's Gemini API  excludes that data from training and human review once the API key sits on a billed Google Cloud account or Vertex AI — a production version of this agent would run exclusively on that billed tier.
