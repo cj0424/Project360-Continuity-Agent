@@ -240,9 +240,8 @@ Keyword search performs well on the current structured evidence but can miss sem
 
 Historical context is limited to the retrieved evidence passed into the reasoning step.
 
-### 4. Conservative Jira assignee handling
-
-Automatic assignee mapping was deliberately left out. Some Jira Capture findings therefore remain as assignee-only pending actions.
+### 4. Manual Jira assignee handling (temporary)
+Assignee mapping is currently manual, since the test environment uses fictional names that don't map to real Jira accounts. This is a temporary limitation of the test setup — with real Jira user accounts, ticket creation and updates would be fully automated, including the assignee.
 
 ### 5. Alert recipient onboarding
 
