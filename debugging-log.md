@@ -124,13 +124,10 @@ Problem: Newly created tickets did not retain their generated Jira key in the fi
 
 Fix: After creation, the workflow writes the real Jira key back into the finding record.
 
-**14. Conservative Jira assignee handling**
+**14. Manual Jira assignee handling (temporary)**
+Decision: Automatic assignee mapping was not implemented in this build.
 
-Decision: Automatic assignee mapping was deliberately not implemented.
-
-Reason: Incorrectly assigning a finding to the wrong person would be more harmful than leaving assignment for human handling.
-
-Current behaviour: Jira Capture findings can therefore be routed as assignee-only pending actions, even where the project team already contains suitable members.
+Reason: The test environment uses fictional names that don't map to real Jira user accounts, so there's no reliable way to auto-assign correctly. This is a limitation of the test setup, not a permanent design boundary.
 
 ## Alerts
 
