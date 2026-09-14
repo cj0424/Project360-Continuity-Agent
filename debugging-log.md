@@ -125,6 +125,7 @@ Problem: Newly created tickets did not retain their generated Jira key in the fi
 Fix: After creation, the workflow writes the real Jira key back into the finding record.
 
 **14. Manual Jira assignee handling (temporary)**
+
 Decision: Automatic assignee mapping was not implemented in this build.
 
 Reason: The test environment uses fictional names that don't map to real Jira user accounts, so there's no reliable way to auto-assign correctly. This is a limitation of the test setup, not a permanent design boundary.
